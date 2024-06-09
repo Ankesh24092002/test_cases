@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Case Generator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #181818;
+            color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px; /* Limit the width */
+            height: 100vh;
+            margin: 0 auto;
+            background: #222;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: #007BFF;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+            color: #fff;
+        }
+        .section {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex: 1;
+        }
+        .section:first-child {
+            border-bottom: 1px solid #333;
+        }
+        label {
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: left;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #2a2a2a;
+            color: #f0f0f0;
+            transition: border-color 0.3s;
+            resize: none;
+            height: 200px;
+        }
+        textarea:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+        .button-container {
+            display: flex;
+            justify-content: flex-start; /* Align button to the left */
+        }
+        button {
+            margin-top: 10px;
+            padding: 0;
+            width: 200px; /* Adjusted width */
+            height: 40px; /* Adjusted height */
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: center;
+            line-height: 40px; /* Centers text vertically */
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .output-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .output-header button {
+            padding: 5px 10px;
+            background: #28a745;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .generated-output {
+            padding: 15px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+            max-height: calc(100vh - 260px); /* Adjusted height based on textarea and other elements */
+            overflow-y: auto; /* Show vertical scrollbar */
+            overflow-x: auto; /* Add horizontal scroll if needed */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: left;
+            flex: 1;
+        }
+        .generated-output::-webkit-scrollbar {
+            width: 8px;
+        }
+        .generated-output::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        .generated-output::-webkit-scrollbar-thumb {
+            background-color: #007BFF;
+            border-radius: 4px;
+        }
+        .generated-output::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+        #loading {
+            display: none;
+            margin-top: 10px;
+            color: #007BFF;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 123, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #007BFF;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+            .generated-output {
+                max-height: 300px;
+            }
+            button {
+                width: auto;
+                height: auto;
+                padding: 10px 20px;
+                line-height: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            Test Case Generator
+        </div>
+        <!-- Input Section -->
+        <div class="section">
+            <label for="user_message">Test Case Description:</label>
+            <textarea id="user_message" name="user_message" placeholder="Describe the functionality to be tested..."></textarea>
+            <div class="button-container">
+                <button type="button" onclick="submitForm()">Generate Test Cases</button>
+            </div>
+            <div id="loading">
+                <div class="spinner"></div> Generating your test cases, please wait...
+            </div>
+        </div>
+        <!-- Output Section -->
+        <div class="section">
+            <div class="output-header">
+                <h2>Generated Test Cases</h2>
+                <button onclick="copyOutput()">Copy</button>
+            </div>
+            <div id="response" class="generated-output"></div>
+        </div>
+    </div>
+    <script>
+        function submitForm() {
+            $('#loading').show(); // Show loading indicator
+            $('#response').hide().html(''); // Clear and hide previous response
+
+            $.ajax({
+                url: "/chat",
+                type: "POST",
+                data: { user_message: $('#user_message').val() },
+                success: function(response) {
+                    console.log(response); // Debugging: log the response
+                    $('#loading').hide(); // Hide loading indicator
+                    $('#response').html(response.response).fadeIn('slow'); // Fade in new response
+                },
+                error: function(xhr, status, error) {
+                    console.log(error); // Debugging: log the error
+                    $('#loading').hide(); // Hide loading indicator
+                    $('#response').html("An error occurred: " + error).fadeIn('slow');
+                }
+            });
+        }
+
+        function copyOutput() {
+            var outputText = $('#response').text();
+            navigator.clipboard.writeText(outputText).then(() => {
+                alert('Output copied to clipboard');
+            }, (err) => {
+                alert('Failed to copy: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>
