@@ -11,22 +11,10 @@
             background-color: #181818;
             color: #f0f0f0;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            max-width: 800px; /* Limit the width */
-            height: 100vh;
-            margin: 0 auto;
-            background: #222;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
         }
         .header {
             background: #007BFF;
@@ -34,15 +22,36 @@
             text-align: center;
             font-size: 1.8rem;
             color: #fff;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: calc(100vh - 60px); /* Full height minus header */
+            margin: 0;
+            background: #222;
+            overflow: hidden;
         }
         .section {
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            flex: 1;
+            height: 100%;
+            box-sizing: border-box;
         }
-        .section:first-child {
-            border-bottom: 1px solid #333;
+        .left-section {
+            border-right: 1px solid #333;
+            flex: 1;
+            overflow: hidden;
+        }
+        .right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
         }
         label {
             margin-bottom: 10px;
@@ -59,7 +68,8 @@
             color: #f0f0f0;
             transition: border-color 0.3s;
             resize: none;
-            height: 200px;
+            flex: 1;
+            overflow: auto;
         }
         textarea:focus {
             border-color: #007BFF;
@@ -67,13 +77,13 @@
         }
         .button-container {
             display: flex;
-            justify-content: flex-start; /* Align button to the left */
+            justify-content: flex-start;
+            margin-top: 10px;
         }
         button {
-            margin-top: 10px;
             padding: 0;
-            width: 200px; /* Adjusted width */
-            height: 40px; /* Adjusted height */
+            width: 200px;
+            height: 40px;
             background-color: #007BFF;
             color: white;
             border: none;
@@ -81,7 +91,7 @@
             cursor: pointer;
             font-size: 1rem;
             text-align: center;
-            line-height: 40px; /* Centers text vertically */
+            line-height: 40px;
             transition: background-color 0.3s;
         }
         button:hover {
@@ -110,16 +120,16 @@
             background-color: #1e1e1e;
             border: 1px solid #333;
             border-radius: 5px;
-            max-height: calc(100vh - 260px); /* Adjusted height based on textarea and other elements */
-            overflow-y: auto; /* Show vertical scrollbar */
-            overflow-x: auto; /* Add horizontal scroll if needed */
+            overflow-y: auto; /* Allow vertical scrolling */
+            overflow-x: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
             text-align: left;
             flex: 1;
+            height: 100%; /* Ensure full height usage */
         }
         .generated-output::-webkit-scrollbar {
-            width: 8px;
+            width: 12px; /* Adjust scrollbar width */
         }
         .generated-output::-webkit-scrollbar-track {
             background: #2a2a2a;
@@ -127,6 +137,7 @@
         .generated-output::-webkit-scrollbar-thumb {
             background-color: #007BFF;
             border-radius: 4px;
+            border: 3px solid #2a2a2a; /* Adjust scrollbar thumb style */
         }
         .generated-output::-webkit-scrollbar-thumb:hover {
             background: #0056b3;
@@ -135,6 +146,7 @@
             display: none;
             margin-top: 10px;
             color: #007BFF;
+            align-self: center;
         }
         .spinner {
             border: 4px solid rgba(0, 123, 255, 0.1);
@@ -152,12 +164,16 @@
         }
         @media (max-width: 768px) {
             .container {
-                max-width: 100%;
-                height: 100%;
-                border-radius: 0;
+                flex-direction: column;
+                height: calc(100vh - 60px); /* Adjust height for header */
             }
-            .generated-output {
-                max-height: 300px;
+            .left-section {
+                border-right: none;
+                border-bottom: 1px solid #333;
+                flex: initial;
+            }
+            .right-section {
+                flex: 1;
             }
             button {
                 width: auto;
@@ -169,13 +185,11 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        Test Case Generator
+    </div>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            Test Case Generator
-        </div>
-        <!-- Input Section -->
-        <div class="section">
+        <div class="section left-section">
             <label for="user_message">Test Case Description:</label>
             <textarea id="user_message" name="user_message" placeholder="Describe the functionality to be tested..."></textarea>
             <div class="button-container">
@@ -185,8 +199,7 @@
                 <div class="spinner"></div> Generating your test cases, please wait...
             </div>
         </div>
-        <!-- Output Section -->
-        <div class="section">
+        <div class="section right-section">
             <div class="output-header">
                 <h2>Generated Test Cases</h2>
                 <button onclick="copyOutput()">Copy</button>
